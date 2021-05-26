@@ -1,0 +1,6 @@
+name: DiscordSRVAlerts
+version: @VERSION@
+main: com.discordsrv.alerts.DiscordSRVAlerts
+depend: [DiscordSRV]
+authors: [Scarsz, Vankka]
+description: A DiscordSRV addon to provide customizable alerts driven by events and commands

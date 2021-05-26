@@ -1,0 +1,59 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'org.cadixdev.licenser' version '0.6.0'
+}
+
+group = 'com.discordsrv'
+version = '1.0-SNAPSHOT'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+
+    maven { url 'https://nexus.scarsz.me/content/groups/public/' }
+    maven { url 'https://nexus.vankka.dev/repository/maven-public/' }
+    maven { url 'https://m2.dv8tion.net/releases/' }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+}
+
+dependencies {
+    compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+    compileOnly 'com.discordsrv:discordsrv:1.23.0-SNAPSHOT'
+    implementation 'org.springframework:spring-expression:5.2.7.RELEASE'
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [VERSION: project.version]
+    }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+jar {
+    dependsOn licenseFormat
+    finalizedBy shadowJar
+}
+
+shadowJar {
+    relocate 'org.springframework.expression', 'com.discordsrv.alerts.dependencies.org.springframework.expression'
+
+    //noinspection GroovyAssignabilityCheck
+    archiveClassifier = ''
+}
+
+license {
+    header = rootProject.file('LICENSE_HEADER')
+    properties {
+        String inception = '2021'
+        String currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
+        year = inception == currentYear ? currentYear : inception + '-' + currentYear
+    }
+    include '**/*.java' // only java files
+}
