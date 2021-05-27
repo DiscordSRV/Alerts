@@ -21,15 +21,16 @@ package com.discordsrv.alerts.listener;
 import alexh.weak.Dynamic;
 import alexh.weak.Weak;
 import com.discordsrv.alerts.Alerts;
-import com.discordsrv.alerts.util.NamedValueFormatter;
-import com.discordsrv.alerts.util.SpELExpressionBuilder;
+import com.discordsrv.alerts.collection.ExpiringDualHashBidiMap;
+import com.discordsrv.alerts.hook.DiscordSRVHook;
+import com.discordsrv.alerts.util.*;
 import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Message;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
-import github.scarsz.discordsrv.objects.ExpiringDualHashBidiMap;
 import github.scarsz.discordsrv.objects.Lag;
-import github.scarsz.discordsrv.objects.MessageFormat;
-import github.scarsz.discordsrv.util.*;
+import github.scarsz.discordsrv.util.DiscordUtil;
+import github.scarsz.discordsrv.util.WebhookUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
@@ -96,7 +97,6 @@ public class AlertListener implements Listener {
                 plugin,
                 false
         );
-        reloadAlerts();
     }
 
     public void register() {
@@ -327,7 +327,7 @@ public class AlertListener implements Listener {
             command = commandBase + (split.length == 2 ? (" " + split[1]) : "");
         }
 
-        MessageFormat messageFormat = MessageFormatResolver.getMessageFromConfiguration(plugin.config(), "Alerts." + alertIndex);
+        MessageFormat messageFormat = MessageFormatUtil.getMessageFromConfiguration(plugin.config(), "Alerts." + alertIndex);
 
         for (String trigger : triggers) {
             String eventName = getEventName(event);
@@ -402,14 +402,15 @@ public class AlertListener implements Listener {
                                     .withPluginVariables()
                                     .withVariable("event", event)
                                     .withVariable("server", Bukkit.getServer())
-                                    .withVariable("discordsrv", DiscordSRV.getPlugin())
+                                    .withVariable("discordsrv", plugin.getDSRVHook().map(DiscordSRVHook::getDiscordSRV).orElse(null))
+                                    .withVariable("alerts", plugin)
                                     .withVariable("player", player)
                                     .withVariable("sender", sender)
                                     .withVariable("command", command)
                                     .withVariable("args", args)
                                     .withVariable("allArgs", String.join(" ", args))
                                     .withVariable("channel", textChannel)
-                                    .withVariable("jda", DiscordUtil.getJda())
+                                    .withVariable("jda", plugin.getDSRVHook().map(DiscordSRVHook::getJDA).orElse(null))
                                     .evaluate(event, Boolean.class);
                             plugin.debug("Condition \"" + expression + "\" -> " + value);
                             if (value != null && !value) {
@@ -436,15 +437,15 @@ public class AlertListener implements Listener {
                     Map<String, Object> variables = new HashMap<>();
                     variables.put("event", event);
                     variables.put("server", Bukkit.getServer());
-                    variables.put("discordsrv", DiscordSRV.getPlugin());
-                    variables.put("discordsrvalerts", plugin);
+                    variables.put("discordsrv", plugin.getDSRVHook().map(DiscordSRVHook::getDiscordSRV).orElse(null));
+                    variables.put("alerts", plugin);
                     variables.put("player", finalPlayer);
                     variables.put("sender", finalSender);
                     variables.put("command", finalCommand);
                     variables.put("args", args);
                     variables.put("allArgs", String.join(" ", args));
                     variables.put("channel", textChannel);
-                    variables.put("jda", DiscordUtil.getJda());
+                    variables.put("jda", plugin.getDSRVHook().map(DiscordSRVHook::getJDA).orElse(null));
                     content = NamedValueFormatter.formatExpressions(content, event, variables);
 
                     // replace any normal placeholders
@@ -454,9 +455,9 @@ public class AlertListener implements Listener {
                                 return Lag.getTPSString();
                             case "time":
                             case "date":
-                                return TimeUtil.timeStamp();
+                                return plugin.getTimeProvider().timeStamp();
                             case "ping":
-                                return finalPlayer != null ? PlayerUtil.getPing(finalPlayer) : "-1";
+                                return finalPlayer != null ? plugin.getPlayerProvider().getPing(finalPlayer) : "-1";
                             case "name":
                             case "username":
                                 return finalPlayer != null ? finalPlayer.getName() : "";
@@ -465,17 +466,21 @@ public class AlertListener implements Listener {
                             case "world":
                                 return finalPlayer != null ? finalPlayer.getWorld().getName() : "";
                             case "embedavatarurl":
-                                return finalPlayer != null ? DiscordSRV.getAvatarUrl(finalPlayer) : DiscordUtil.getJda().getSelfUser().getEffectiveAvatarUrl();
+                                return finalPlayer != null ? plugin.getAvatarProvider().getAvatarUrl(finalPlayer) : DiscordUtil.getJda().getSelfUser().getEffectiveAvatarUrl();
                             case "botavatarurl":
-                                return DiscordUtil.getJda().getSelfUser().getEffectiveAvatarUrl();
+                                return plugin.getDSRVHook().map(hook -> hook.getJDA().getSelfUser().getEffectiveAvatarUrl()).orElse("https://cdn.discordapp.com/embed/avatars/0.png");
                             case "botname":
-                                return DiscordSRV.getPlugin().getMainGuild() != null ? DiscordSRV.getPlugin().getMainGuild().getSelfMember().getEffectiveName() : DiscordUtil.getJda().getSelfUser().getName();
+                                return plugin.getDSRVHook().map(hook -> {
+                                    Guild guild = hook.getDiscordSRV().getMainGuild();
+                                    return guild != null ? guild.getSelfMember().getEffectiveName() : hook.getJDA().getSelfUser().getName();
+                                }).orElse("Bot");
                             default:
                                 return "{" + key + "}";
                         }
                     });
 
-                    content = DiscordUtil.translateEmotes(content, textChannel.getGuild());
+                    DiscordSRVHook hook = plugin.getDSRVHook().orElse(null);
+                    if (hook != null) content = hook.translateEmotes(content, textChannel.getGuild());
                     content = PlaceholderUtil.replacePlaceholdersToDiscord(content, finalPlayer);
                     return content;
                 };

@@ -18,20 +18,32 @@
 
 package com.discordsrv.alerts;
 
+import com.discordsrv.alerts.hook.DiscordSRVHook;
 import com.discordsrv.alerts.listener.AlertListener;
+import com.discordsrv.alerts.provider.AvatarProvider;
+import com.discordsrv.alerts.provider.PlayerProvider;
+import com.discordsrv.alerts.provider.TimeProvider;
 import github.scarsz.configuralize.DynamicConfig;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.commons.lang3.exception.ExceptionUtils;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 public final class Alerts extends JavaPlugin {
 
     private DynamicConfig config;
+
     private AlertListener listener;
-    private boolean discordsrv;
+
+    private AvatarProvider avatarProvider;
+    private PlayerProvider playerProvider;
+    private TimeProvider timeProvider;
+
+    private DiscordSRVHook dsrvHook;
 
     @Override
     public void onEnable() {
@@ -53,9 +65,15 @@ public final class Alerts extends JavaPlugin {
             return;
         }
 
+        listener = new AlertListener(this);
+        listener.reloadAlerts();
+
+        this.avatarProvider = new AvatarProvider(this);
+        this.playerProvider = new PlayerProvider(this);
+        this.timeProvider = new TimeProvider(this);
+
         if (getServer().getPluginManager().getPlugin("DiscordSRV") != null) {
-            DiscordSRV.api.subscribe(this);
-            discordsrv = true;
+            dsrvHook = new DiscordSRVHook(this);
         }
     }
 
@@ -74,8 +92,20 @@ public final class Alerts extends JavaPlugin {
         return listener;
     }
 
-    public boolean isDiscordSRV() {
-        return discordsrv;
+    public AvatarProvider getAvatarProvider() {
+        return avatarProvider;
+    }
+
+    public PlayerProvider getPlayerProvider() {
+        return playerProvider;
+    }
+
+    public TimeProvider getTimeProvider() {
+        return timeProvider;
+    }
+
+    public Optional<DiscordSRVHook> getDSRVHook() {
+        return Optional.ofNullable(dsrvHook);
     }
 
     public void info(String message) {
