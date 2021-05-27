@@ -1,6 +1,6 @@
 /*
- * DiscordSRVAlerts: A DiscordSRV addon to provide customizable alerts based on events and commands
- * Copyright (C) 2021 DiscordSRVAlerts contributors
+ * Alerts: A bukkit plugin to send customizable alerts to Discord driven by events and commands
+ * Copyright (C) 2021 Alerts contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,27 +20,23 @@ package com.discordsrv.alerts;
 
 import com.discordsrv.alerts.listener.AlertListener;
 import github.scarsz.configuralize.DynamicConfig;
-import github.scarsz.configuralize.Language;
 import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.api.Subscribe;
-import github.scarsz.discordsrv.api.events.ConfigReloadedEvent;
-import github.scarsz.discordsrv.api.events.DiscordReadyEvent;
 import github.scarsz.discordsrv.dependencies.commons.lang3.exception.ExceptionUtils;
-import github.scarsz.discordsrv.util.DiscordUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
 
-public final class DiscordSRVAlerts extends JavaPlugin {
+public final class Alerts extends JavaPlugin {
 
     private DynamicConfig config;
     private AlertListener listener;
+    private boolean discordsrv;
 
     @Override
     public void onEnable() {
         config = new DynamicConfig();
-        config.addSource(DiscordSRVAlerts.class, "config", new File(getDataFolder(), "config.yml"));
+        config.addSource(Alerts.class, "config", new File(getDataFolder(), "config.yml"));
 
         try {
             config.saveAllDefaults();
@@ -57,24 +53,9 @@ public final class DiscordSRVAlerts extends JavaPlugin {
             return;
         }
 
-        Language dsrvLanguage = DiscordSRV.config().getLanguage();
-        if (config.isLanguageAvailable(dsrvLanguage)) {
-            config.setLanguage(dsrvLanguage);
-        }
-
-        DiscordSRV.api.subscribe(this);
-    }
-
-    @Subscribe
-    public void onDiscordSRVReady(DiscordReadyEvent event) {
-        listener = new AlertListener(this);
-        DiscordUtil.getJda().addEventListener(listener);
-    }
-
-    @Subscribe
-    public void onDiscordSRVReload(ConfigReloadedEvent event) {
-        if (listener != null) {
-            listener.reloadAlerts();
+        if (getServer().getPluginManager().getPlugin("DiscordSRV") != null) {
+            DiscordSRV.api.subscribe(this);
+            discordsrv = true;
         }
     }
 
@@ -87,6 +68,14 @@ public final class DiscordSRVAlerts extends JavaPlugin {
 
     public DynamicConfig config() {
         return config;
+    }
+
+    public AlertListener getListener() {
+        return listener;
+    }
+
+    public boolean isDiscordSRV() {
+        return discordsrv;
     }
 
     public void info(String message) {

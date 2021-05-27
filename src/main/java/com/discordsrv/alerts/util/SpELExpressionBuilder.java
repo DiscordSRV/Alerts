@@ -1,6 +1,6 @@
 /*
- * DiscordSRVAlerts: A DiscordSRV addon to provide customizable alerts based on events and commands
- * Copyright (C) 2021 DiscordSRVAlerts contributors
+ * Alerts: A bukkit plugin to send customizable alerts to Discord driven by events and commands
+ * Copyright (C) 2021 Alerts contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

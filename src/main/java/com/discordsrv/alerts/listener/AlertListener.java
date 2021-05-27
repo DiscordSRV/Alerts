@@ -1,6 +1,6 @@
 /*
- * DiscordSRVAlerts: A DiscordSRV addon to provide customizable alerts based on events and commands
- * Copyright (C) 2021 DiscordSRVAlerts contributors
+ * Alerts: A bukkit plugin to send customizable alerts to Discord driven by events and commands
+ * Copyright (C) 2021 Alerts contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,20 @@
 
 package com.discordsrv.alerts.listener;
 
-import com.discordsrv.alerts.DiscordSRVAlerts;
-import com.discordsrv.alerts.util.SpELExpressionBuilder;
+import alexh.weak.Dynamic;
+import alexh.weak.Weak;
+import com.discordsrv.alerts.Alerts;
 import com.discordsrv.alerts.util.NamedValueFormatter;
+import com.discordsrv.alerts.util.SpELExpressionBuilder;
 import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.alexh.weak.Dynamic;
-import github.scarsz.discordsrv.dependencies.alexh.weak.Weak;
-import github.scarsz.discordsrv.dependencies.commons.lang3.StringUtils;
-import github.scarsz.discordsrv.dependencies.commons.lang3.math.NumberUtils;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Message;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
-import github.scarsz.discordsrv.dependencies.jda.api.events.GenericEvent;
-import github.scarsz.discordsrv.dependencies.jda.api.hooks.EventListener;
 import github.scarsz.discordsrv.objects.ExpiringDualHashBidiMap;
 import github.scarsz.discordsrv.objects.Lag;
 import github.scarsz.discordsrv.objects.MessageFormat;
 import github.scarsz.discordsrv.util.*;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -45,7 +43,6 @@ import org.bukkit.plugin.RegisteredListener;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.SpelEvaluationException;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -58,13 +55,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class AlertListener implements Listener, EventListener {
+public class AlertListener implements Listener {
 
     private static final Pattern VALID_CLASS_NAME_PATTERN = Pattern.compile("([\\p{L}_$][\\p{L}\\p{N}_$]*\\.)*[\\p{L}_$][\\p{L}\\p{N}_$]*");
     private static final List<String> BLACKLISTED_CLASS_NAMES = Arrays.asList(
             // Causes issues with logins with some plugins
             "com.destroystokyo.paper.event.player.PlayerHandshakeEvent",
-            // Causes server to on to the main thread & breaks team color on Paper
+            // Causes the server to synchronize with the main thread & breaks team color on Paper
             "org.bukkit.event.player.PlayerChatEvent"
     );
     private static final List<String> SYNC_EVENT_NAMES = Arrays.asList(
@@ -85,12 +82,12 @@ public class AlertListener implements Listener, EventListener {
         }
     }
 
-    private final DiscordSRVAlerts plugin;
+    private final Alerts plugin;
     private final RegisteredListener listener;
     private final List<Dynamic> alerts = new ArrayList<>();
     private boolean registered = false;
 
-    public AlertListener(DiscordSRVAlerts plugin) {
+    public AlertListener(Alerts plugin) {
         this.plugin = plugin;
         listener = new RegisteredListener(
                 this,
@@ -203,12 +200,7 @@ public class AlertListener implements Listener, EventListener {
         registered = false;
     }
 
-    @Override
-    public void onEvent(@Nonnull GenericEvent event) {
-        runAlertsForEvent(event);
-    }
-
-    private void runAlertsForEvent(Object event) {
+    public void runAlertsForEvent(Object event) {
         boolean command = event instanceof PlayerCommandPreprocessEvent || event instanceof ServerCommandEvent;
 
         boolean active = false;

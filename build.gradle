@@ -23,8 +23,16 @@ repositories {
 }
 
 dependencies {
+    // Bukkit
     compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+
+    // DiscordSRV
     compileOnly 'com.discordsrv:discordsrv:1.23.0-SNAPSHOT'
+
+    // Config
+    implementation 'github.scarsz:configuralize:1.3.2'
+
+    // SpEL
     implementation 'org.springframework:spring-expression:5.2.7.RELEASE'
 }
 
@@ -42,6 +50,8 @@ jar {
 
 shadowJar {
     relocate 'org.springframework.expression', 'com.discordsrv.alerts.dependencies.org.springframework.expression'
+    relocate 'org.apache', 'com.discordsrv.alerts.dependencies.org.apache'
+    relocate 'alexh', 'com.discordsrv.alerts.dependencies.alexh'
 
     //noinspection GroovyAssignabilityCheck
     archiveClassifier = ''

@@ -1,6 +1,7 @@
-name: DiscordSRVAlerts
+name: Alerts
 version: @VERSION@
-main: com.discordsrv.alerts.DiscordSRVAlerts
-depend: [DiscordSRV]
+main: com.discordsrv.alerts.Alerts
+# loadbefore so we can be sure that we'll get the ready event
+loadbefore: [DiscordSRV]
 authors: [Scarsz, Vankka]
-description: A DiscordSRV addon to provide customizable alerts driven by events and commands
+description: A bukkit plugin to send customizable alerts to Discord driven by events and commands
