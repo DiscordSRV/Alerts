@@ -26,7 +26,7 @@ import com.discordsrv.alerts.provider.TimeProvider;
 import github.scarsz.configuralize.DynamicConfig;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.commons.lang3.exception.ExceptionUtils;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -47,6 +47,13 @@ public final class Alerts extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        if (Bukkit.getPluginManager().getPlugin("DiscordSRV") == null) {
+            // TODO: remove when it's not
+            getLogger().severe("DiscordSRV is required");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         config = new DynamicConfig();
         config.addSource(Alerts.class, "config", new File(getDataFolder(), "config.yml"));
 

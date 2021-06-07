@@ -1,5 +1,6 @@
-# This is an /advanced/ feature of DiscordSRV that allows you to send messages to Discord when a game event happens
-# or when a command is run. You will need a working knowledge of how Bukkit events work and their properties.
+# Alerts
+# Allows you to send messages to Discord when a game event happens or a command is executed
+# IMPORTANT: You will need a working knowledge of how Bukkit events work and their properties.
 # If you aren't sure about what you're doing here, maybe ask a developer or join our support server @ discordsrv.com/discord
 #
 # Refer to the Bukkit API javadoc to find events & properties to use:

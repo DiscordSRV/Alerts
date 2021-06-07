@@ -328,6 +328,10 @@ public class AlertListener implements Listener {
         }
 
         MessageFormat messageFormat = MessageFormatUtil.getMessageFromConfiguration(plugin.config(), "Alerts." + alertIndex);
+        if (messageFormat == null) {
+            plugin.debug("Not sending a alert because the MessageFormat is null");
+            return;
+        }
 
         for (String trigger : triggers) {
             String eventName = getEventName(event);
@@ -485,7 +489,7 @@ public class AlertListener implements Listener {
                     return content;
                 };
 
-                Message message = DiscordSRV.translateMessage(messageFormat, translator);
+                Message message = DiscordSRV.translateMessage(messageFormat.toDSRV(), translator);
                 if (message == null) {
                     plugin.debug("Not sending alert because it is configured to have no message content");
                     return;
