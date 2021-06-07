@@ -39,6 +39,10 @@ dependencies {
     // Config
     implementation 'github.scarsz:configuralize:1.3.2'
 
+    // Commons
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-lang3:3.5'
+
     // SpEL
     implementation 'org.springframework:spring-expression:5.2.7.RELEASE'
 }
