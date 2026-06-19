@@ -1,10 +1,12 @@
 plugins {
     id("com.gradleup.shadow") version "8.3.8"
+    id("net.kyori.indra.licenser.spotless") version "3.1.3"
 }
 
 allprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.gradleup.shadow'
+    apply plugin: 'net.kyori.indra.licenser.spotless'
 
     group = 'com.discordsrv.alerts'
     version = '1.0-SNAPSHOT'
@@ -21,6 +23,17 @@ allprojects {
         disableAutoTargetJvm()
     }
 
+    indraSpotlessLicenser {
+        licenseHeaderFile(rootProject.file('gradle/LICENSE_HEADER'))
+        newLine(true)
+    }
+
+    if (project != rootProject && project.name != "common") {
+        jar.finalizedBy shadowJar
+    } else {
+        shadowJar.enabled = false
+    }
+
     shadowJar {
         [
                 'com.discordsrv.configurate',
@@ -32,6 +45,17 @@ allprojects {
                 'org.springframework'
         ].each {
             relocate it, 'com.discordsrv.alerts.dependencies.' + it
+        }
+
+        // Remove -all
+        archiveClassifier = null
+
+        // Exclude maven/ from META-INF
+        exclude 'META-INF/maven/**'
+
+        // Include the license in the jar
+        from(rootProject.file('LICENSE')) {
+            rename { fileName -> 'LICENSE.txt' }
         }
     }
 }
