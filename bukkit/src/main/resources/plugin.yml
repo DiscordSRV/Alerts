@@ -2,7 +2,7 @@ name: DiscordSRV-Alerts
 version: @VERSION@
 main: com.discordsrv.alerts.bukkit.AlertsBukkitBootstrap
 api-version: "1.13"
-softdepend: [DiscordSRV-Ascension]
+depend: [DiscordSRV-Ascension]
 
 commands:
   discordsrvalerts:
