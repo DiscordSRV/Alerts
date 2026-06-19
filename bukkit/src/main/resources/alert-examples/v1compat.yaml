@@ -1,0 +1,24 @@
+shorthands:
+  tps: "T(java.lang.Math).round(#server.getTPS()[0] * 10.0) / 10.0"
+  time: "new java.text.SimpleDateFormat('EEE, d. MMM yyyy HH:mm:ss z').format(T(java.util.Date).from(T(java.time.Instant).now()))"
+  date: "new java.text.SimpleDateFormat('EEE, d. MMM yyyy HH:mm:ss z').format(T(java.util.Date).from(T(java.time.Instant).now()))"
+  ping: "#player.getPing()"
+  name: "#player.getName()"
+  username: "#player.getName()"
+  displayname: "T(org.bukkit.ChatColor).stripColor(#player.getDisplayName())"
+  world: "#player.getWorld().getName()"
+  embedavatarurl: "#discordsrv.placeholderService().replacePlaceholders('%player_avatar_url%', #discordsrv.playerProvider().player(#player.getUniqueId()))"
+  botavatarurl: "#jda.getSelfUser().getEffectiveAvatarUrl()"
+  botname: "#jda.getSelfUser().getEffectiveName()"
+
+#Alerts:
+#  # Example config to send messages to the specified channel id when a player successfully catches a fish
+#  - Trigger: org.bukkit.event.player.PlayerFishEvent
+#    Channel: 000000000000000000
+#    Conditions:
+#      - state.name() == 'CAUGHT_FISH'
+#    Embed:
+#      Color: "#00ff00"
+#      Author:
+#        ImageUrl: "{embedavatarurl}"
+#        Name: "%player_name% caught a ${caught.itemStack.type.name()}!"

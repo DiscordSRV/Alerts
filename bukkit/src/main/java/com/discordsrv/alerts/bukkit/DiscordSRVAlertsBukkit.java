@@ -30,13 +30,14 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.net.URL;
 import java.nio.file.Path;
 
 public class DiscordSRVAlertsBukkit extends DiscordSRVAlerts {
 
-    private final JavaPlugin bootstrap;
+    private final AlertsBukkitBootstrap bootstrap;
 
-    public DiscordSRVAlertsBukkit(Path dataDirectory, Logger logger, JavaPlugin bootstrap) {
+    public DiscordSRVAlertsBukkit(Path dataDirectory, Logger logger, AlertsBukkitBootstrap bootstrap) {
         super(dataDirectory, logger);
         this.bootstrap = bootstrap;
     }
@@ -64,6 +65,14 @@ public class DiscordSRVAlertsBukkit extends DiscordSRVAlerts {
         return new Class[] {
                 PlayerCommandPreprocessEvent.class,
                 ServerCommandEvent.class
+        };
+    }
+
+    @Override
+    public URL[] getExampleAlertResources() {
+        return new URL[] {
+            bootstrap.classLoader().getResource("alert-examples/example.yaml"),
+            bootstrap.classLoader().getResource("alert-examples/v1compat.yaml")
         };
     }
 

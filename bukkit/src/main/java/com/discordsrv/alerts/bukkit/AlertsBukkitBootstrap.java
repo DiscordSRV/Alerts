@@ -38,4 +38,8 @@ public class AlertsBukkitBootstrap extends JavaPlugin {
     public void onEnable() {
         alerts.enable();
     }
+
+    public ClassLoader classLoader() {
+        return getClassLoader();
+    }
 }

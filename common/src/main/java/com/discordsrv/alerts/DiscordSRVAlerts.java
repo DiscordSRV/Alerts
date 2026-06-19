@@ -35,6 +35,7 @@ import com.discordsrv.api.events.Event;
 import com.discordsrv.dependencies.net.dv8tion.jda.api.events.GenericEvent;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -63,7 +64,8 @@ public abstract class DiscordSRVAlerts {
     public void reload() {
         List<AlertFileConfig> fileConfigs;
         try {
-            fileConfigs = configManager.loadConfigs(dataDirectory);
+            URL[] exampleAlertResources = getExampleAlertResources();
+            fileConfigs = configManager.loadAlertConfigs(dataDirectory.resolve("alerts"), exampleAlertResources);
         } catch (Exception e) {
             logger.error("Failed to reload configuration", e);
             return;
@@ -154,6 +156,7 @@ public abstract class DiscordSRVAlerts {
     }
 
     public abstract Class<?>[] getCommandEventClasses();
+    public abstract URL[] getExampleAlertResources();
 
     public EventHookRegistry eventHookRegistry() {
         return eventHookRegistry;

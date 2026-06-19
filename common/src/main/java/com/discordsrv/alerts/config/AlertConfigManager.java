@@ -27,20 +27,35 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.discordsrv.configurate.serializer.SerializerUtil.resolveNode;
-
 public class AlertConfigManager {
 
-    public List<AlertFileConfig> loadConfigs(Path dataDirectory) throws IOException {
-        if (!Files.exists(dataDirectory)) {
-            Files.createDirectories(dataDirectory);
+    public List<AlertFileConfig> loadAlertConfigs(Path alertDataDirectory, URL[] exampleResources) throws IOException {
+        if (!Files.exists(alertDataDirectory)) {
+            Files.createDirectories(alertDataDirectory);
+
+            for (URL exampleResource : exampleResources) {
+                String fileName = exampleResource.getFile();
+                fileName = fileName.substring(fileName.lastIndexOf(File.separatorChar) + 1);
+                Path filePath = alertDataDirectory.resolve(fileName);
+
+                try (BufferedInputStream inputStream = new BufferedInputStream(exampleResource.openStream())) {
+                    try (BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(filePath))) {
+                        byte[] buffer = new byte[512];
+                        int i;
+                        while ((i = inputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, i);
+                        }
+                    }
+                }
+            }
         }
 
         ConfigurationOptions configurationOptions = ConfigurationOptions
@@ -52,8 +67,13 @@ public class AlertConfigManager {
                 );
 
         List<AlertFileConfig> alertFiles = new ArrayList<>();
-        try (Stream<Path> files = Files.list(dataDirectory)) {
+        try (Stream<Path> files = Files.list(alertDataDirectory)) {
             for (Path path : files.toList()) {
+                String fileName = path.getFileName().toString();
+                if (!fileName.endsWith(".yaml") && !fileName.endsWith(".yml"))  {
+                    continue;
+                }
+
                 YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
                         .indent(4)
                         .defaultOptions(configurationOptions)

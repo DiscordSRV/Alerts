@@ -1,0 +1,13 @@
+#shorthands:
+#  player_name: "#player.getName()"
+
+#alerts:
+#  # Example config to send messages to the specified channel id when a player successfully catches a fish
+#  - triggers: [org.bukkit.event.player.PlayerFishEvent]
+#    channels: [000000000000000000]
+#    conditions:
+#      - state.name() == 'CAUGHT_FISH'
+#    embeds:
+#      - color: "#00ff00"
+#        author:
+#          name: "{player_name} caught a ${caught.itemStack.type.name()}!"
