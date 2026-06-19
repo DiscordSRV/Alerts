@@ -1,0 +1,19 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+repositories {
+    maven {
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+}
+
+dependencies {
+    api(project(':common'))
+
+    compileOnly("io.papermc.paper:paper-api:26.1.1.build.+")
+}
+
+jar.finalizedBy shadowJar
+
+processResources {
+    filter(ReplaceTokens, tokens: ['VERSION': project.version])
+}

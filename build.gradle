@@ -1,0 +1,37 @@
+plugins {
+    id("com.gradleup.shadow") version "8.3.8"
+}
+
+allprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'com.gradleup.shadow'
+
+    group = 'com.discordsrv.alerts'
+    version = '1.0-SNAPSHOT'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    java {
+        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+
+        disableAutoTargetJvm()
+    }
+
+    shadowJar {
+        [
+                'com.discordsrv.configurate',
+                'io.leangen.geantyref',
+                'net.kyori.option',
+                'org.apache.commons.logging',
+                'org.jspecify.annotations',
+                'org.spongepowered.configurate',
+                'org.springframework'
+        ].each {
+            relocate it, 'com.discordsrv.alerts.dependencies.' + it
+        }
+    }
+}

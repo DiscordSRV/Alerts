@@ -1,0 +1,11 @@
+dependencies {
+    // Spring Expression
+    implementation 'org.springframework:spring-expression:7.0.7'
+
+    // Configure
+    api("org.spongepowered:configurate-yaml:4.2.0")
+
+    // Integration
+    compileOnly("com.discordsrv:discordsrv-api:3.0.0-SNAPSHOT")
+    api("com.discordsrv:discordsrv-api-configurate:3.0.0-SNAPSHOT")
+}

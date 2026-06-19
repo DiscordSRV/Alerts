@@ -1,0 +1,52 @@
+package com.discordsrv.alerts.config;
+
+import com.discordsrv.alerts.config.alert.AlertConfig;
+import com.discordsrv.alerts.config.alert.AlertConfigSerializer;
+import com.discordsrv.alerts.config.alertfile.AlertFileConfig;
+import com.discordsrv.alerts.config.alertfile.AlertFileConfigSerializer;
+import com.discordsrv.configurate.DiscordSRVConfigurate;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static com.discordsrv.configurate.serializer.SerializerUtil.resolveNode;
+
+public class AlertConfigManager {
+
+    public List<AlertFileConfig> loadConfigs(Path dataDirectory) throws IOException {
+        if (!Files.exists(dataDirectory)) {
+            Files.createDirectories(dataDirectory);
+        }
+
+        ConfigurationOptions configurationOptions = ConfigurationOptions
+                .defaults()
+                .serializers(builder -> builder
+                        .registerAll(DiscordSRVConfigurate.SERIALIZERS)
+                        .register(AlertConfig.class, new AlertConfigSerializer())
+                        .register(AlertFileConfig.class, new AlertFileConfigSerializer())
+                );
+
+        List<AlertFileConfig> alertFiles = new ArrayList<>();
+        try (Stream<Path> files = Files.list(dataDirectory)) {
+            for (Path path : files.toList()) {
+                YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                        .indent(4)
+                        .defaultOptions(configurationOptions)
+                        .path(path)
+                        .build();
+
+                CommentedConfigurationNode node = loader.load();
+                alertFiles.add(node.get(AlertFileConfig.class));
+            }
+        }
+
+        return alertFiles;
+    }
+}
